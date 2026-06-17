@@ -28,28 +28,30 @@ Make sure you have Python 3 installed on your system.
 ### 2. Setup and Installation
 
 Clone the repository and navigate into the project directory:
-
+```bash
 git clone https://github.com/GwnDrlng/gwndrlng-event-talks-app.git
-
 cd gwndrlng-event-talks-app
+```
 
 Create and activate a virtual environment:
-
-On macOS/Linux:
+```bash
+# On macOS/Linux
 python3 -m venv venv
-
 source venv/bin/activate
+```
 
 Install the dependencies:
-
+```bash
 pip install -r requirements.txt
+```
 
 ### 3. Run the App
 Start the Flask development server:
-
+```bash
 python app.py
+```
 
-Open http://127.0.0.1:5001 in your browser to explore the dashboard!
+Open [http://127.0.0.1:5001](http://127.0.0.1:5001) in your browser to explore the dashboard!
 
 ---
 
