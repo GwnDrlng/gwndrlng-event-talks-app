@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const notesContainer = document.getElementById('notesContainer');
     const errorBanner = document.getElementById('errorBanner');
     const errorMessage = document.getElementById('errorMessage');
+    const exportCsvBtn = document.getElementById('exportCsvBtn');
     
     // Sidebar Elements
     const composerSidebar = document.getElementById('composerSidebar');
@@ -88,9 +89,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="card-footer">
                     ${note.link ? `<a href="${escapeHTML(note.link)}" target="_blank" class="orig-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> View docs</a>` : '<span></span>'}
-                    <button class="btn btn-primary btn-sm select-note-btn">
-                        <i class="fa-solid fa-feather"></i> Select for Tweet
-                    </button>
+                    <div class="card-actions">
+                        <button class="btn btn-ghost btn-sm copy-note-btn" title="Copy to clipboard">
+                            <i class="fa-regular fa-copy"></i> Copy
+                        </button>
+                        <button class="btn btn-primary btn-sm select-note-btn">
+                            <i class="fa-solid fa-feather"></i> Select for Tweet
+                        </button>
+                    </div>
                 </div>
             `;
             
@@ -98,6 +104,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const selectBtn = card.querySelector('.select-note-btn');
             selectBtn.addEventListener('click', () => {
                 selectNoteForTweet(note);
+            });
+
+            // Wire copy to clipboard action
+            const copyBtn = card.querySelector('.copy-note-btn');
+            copyBtn.addEventListener('click', () => {
+                copyToClipboard(note, copyBtn);
             });
 
             notesContainer.appendChild(card);
@@ -186,6 +198,84 @@ document.addEventListener('DOMContentLoaded', () => {
         );
     }
 
+    // Helper: Strip HTML tags from content string
+    function stripHTML(html) {
+        const div = document.createElement('div');
+        div.innerHTML = html;
+        return div.textContent || div.innerText || '';
+    }
+
+    // Copy a note's text content to the clipboard
+    function copyToClipboard(note, btn) {
+        let formattedDate = '';
+        if (note.updated) {
+            try {
+                formattedDate = new Date(note.updated).toLocaleDateString('en-US', {
+                    year: 'numeric', month: 'long', day: 'numeric'
+                });
+            } catch (e) {}
+        }
+        const plainContent = stripHTML(note.content);
+        const text = [
+            note.title,
+            formattedDate ? `Date: ${formattedDate}` : '',
+            '',
+            plainContent.trim(),
+            note.link ? `\nRead more: ${note.link}` : ''
+        ].filter(Boolean).join('\n');
+
+        navigator.clipboard.writeText(text).then(() => {
+            // Brief success feedback on the button
+            const icon = btn.querySelector('i');
+            const originalClass = icon.className;
+            icon.className = 'fa-solid fa-check';
+            btn.classList.add('copy-success');
+            setTimeout(() => {
+                icon.className = originalClass;
+                btn.classList.remove('copy-success');
+            }, 1800);
+        }).catch(() => {
+            showError('Could not copy to clipboard. Please try manually.');
+        });
+    }
+
+    // Export all currently loaded notes to a CSV file
+    function exportToCsv() {
+        if (allNotes.length === 0) {
+            showError('No notes available to export.');
+            return;
+        }
+
+        const headers = ['Title', 'Date', 'Content', 'Link'];
+        const escCsv = (val) => `"${String(val).replace(/"/g, '""')}"`;
+
+        const rows = allNotes.map(note => {
+            let formattedDate = '';
+            if (note.updated) {
+                try {
+                    formattedDate = new Date(note.updated).toLocaleDateString('en-US', {
+                        year: 'numeric', month: 'long', day: 'numeric'
+                    });
+                } catch(e) {}
+            }
+            return [
+                escCsv(note.title),
+                escCsv(formattedDate),
+                escCsv(stripHTML(note.content).trim()),
+                escCsv(note.link || '')
+            ].join(',');
+        });
+
+        const csvContent = [headers.map(escCsv).join(','), ...rows].join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `bigquery-release-notes-${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
     // Show/Hide Loading state
     function showLoading(isLoading) {
         if (isLoading) {
@@ -213,6 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Listeners
     refreshBtn.addEventListener('click', fetchNotes);
+    exportCsvBtn.addEventListener('click', exportToCsv);
     
     searchInput.addEventListener('input', (e) => {
         const query = e.target.value.toLowerCase().trim();
