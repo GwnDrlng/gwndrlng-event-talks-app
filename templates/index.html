@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BigQuery Release Notes Hub</title>
+    <meta name="description" content="Stay up to date with Google Cloud BigQuery releases and share updates instantly.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar / Tweet Composer Panel -->
+        <aside class="composer-sidebar" id="composerSidebar">
+            <div class="sidebar-header">
+                <h2><i class="fa-brands fa-x-twitter"></i> Tweet Composer</h2>
+                <button class="close-sidebar-btn" id="closeSidebar" aria-label="Close Composer">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="composer-body">
+                <p class="composer-instruction">Draft your tweet for the selected release note update. Click "Tweet Update" to open in Twitter/X.</p>
+                
+                <div class="selected-note-preview" id="selectedNotePreview">
+                    <p class="no-selection-msg">No update selected. Click "Select for Tweet" on any release note card to start.</p>
+                </div>
+                
+                <div class="tweet-box-container">
+                    <textarea id="tweetTextarea" placeholder="Write your tweet here..." maxlength="280"></textarea>
+                    <div class="tweet-footer">
+                        <span class="char-counter" id="charCounter">280</span>
+                        <button id="tweetBtn" class="btn btn-primary disabled" disabled>
+                            <i class="fa-brands fa-x-twitter"></i> Tweet Update
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="app-header">
+                <div class="header-title-section">
+                    <div class="logo-container">
+                        <i class="fa-solid fa-database logo-icon"></i>
+                        <span class="logo-accent"></span>
+                    </div>
+                    <div>
+                        <h1>BigQuery Release Notes</h1>
+                        <p class="subtitle">Track the latest updates, features, and fixes from Google BigQuery</p>
+                    </div>
+                </div>
+                
+                <div class="header-actions">
+                    <div class="search-container">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="text" id="searchInput" placeholder="Search updates...">
+                    </div>
+                    <button id="refreshBtn" class="btn btn-secondary" aria-label="Refresh release notes">
+                        <i class="fa-solid fa-rotate-right" id="refreshIcon"></i> Refresh
+                    </button>
+                </div>
+            </header>
+
+            <!-- Error Banner -->
+            <div id="errorBanner" class="error-banner hidden">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span id="errorMessage">Failed to fetch release notes. Please try again.</span>
+            </div>
+
+            <!-- Notes Grid/List -->
+            <section class="notes-section">
+                <div class="loading-state" id="loadingState">
+                    <div class="spinner"></div>
+                    <p>Fetching latest release notes...</p>
+                </div>
+                
+                <div class="empty-state hidden" id="emptyState">
+                    <i class="fa-solid fa-folder-open empty-icon"></i>
+                    <h3>No Release Notes Found</h3>
+                    <p>Try refreshing or matching a different search term.</p>
+                </div>
+
+                <div class="notes-container" id="notesContainer"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Background decorative grids/glows -->
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
